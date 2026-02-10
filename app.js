@@ -6,7 +6,7 @@ templateImg.src = "template.png";
 
 // 👉 你的 Apps Script Web App URL
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyj2M0Owz7MPu86PcW0aPjRTQRYq6YmChjd1Lge_-nWMnvLCToEdX0rlyxhfPDg_N1m/exec"
+  "https://script.google.com/macros/s/AKfycbwERxIRKn4rhkuD_PgBXDyLnAshHrVxeNXeNnkoDjdqUG9JqUaZinwfeJHPcG3MBiBF/exec"
 
 function generate() {
   const file = document.getElementById("imgInput").files[0];
@@ -73,7 +73,7 @@ function sendToYou() {
     image: canvas.toDataURL("image/png")
   };
 
-  fetch("https://script.google.com/macros/s/AKfycbyj2M0Owz7MPu86PcW0aPjRTQRYq6YmChjd1Lge_-nWMnvLCToEdX0rlyxhfPDg_N1m/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbwERxIRKn4rhkuD_PgBXDyLnAshHrVxeNXeNnkoDjdqUG9JqUaZinwfeJHPcG3MBiBF/exec", {
     method: "POST",
     mode: "no-cors",
     headers: {
@@ -84,5 +84,6 @@ function sendToYou() {
 
   alert("已送出，圖片已上傳至 Google Drive ✅");
 }
+
 
 
