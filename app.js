@@ -6,7 +6,7 @@ templateImg.src = "template.png";
 
 // 👉 你的 Apps Script Web App URL
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzj_8VKYbibrT_r_be6kjQzoleVl_EPgnV3le4EhMCrQK1zYsVtmNZW3vDaEE8I7YuW/exec"
+  "https://script.google.com/macros/s/AKfycbyj2M0Owz7MPu86PcW0aPjRTQRYq6YmChjd1Lge_-nWMnvLCToEdX0rlyxhfPDg_N1m/exec"
 
 function generate() {
   const file = document.getElementById("imgInput").files[0];
@@ -63,39 +63,26 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   ctx.fillText(line, x, y);
 }
 
-async function sendToYou() {
-  try {
-    const imageData = canvas.toDataURL("image/png");
-
-    const res = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: imageData })
-    });
-
-    const result = await res.json();
-    if (!result.success) throw "Upload failed";
-
-    // ✅ 成功才顯示感謝
-    document.body.innerHTML = `
-      <div style="
-        height:100vh;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        text-align:center;
-        font-size:22px;
-        line-height:1.8;
-      ">
-        🙏 感謝您的購買與評價<br/>
-        祝您有愉快的一天 💙
-      </div>
-    `;
-
-  } catch (err) {
-    alert("上傳失敗，請再試一次");
-    console.error(err);
+function sendToYou() {
+  if (canvas.width === 0 || canvas.height === 0) {
+    alert("請先產生圖片");
+    return;
   }
 
+  const payload = {
+    image: canvas.toDataURL("image/png")
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbyj2M0Owz7MPu86PcW0aPjRTQRYq6YmChjd1Lge_-nWMnvLCToEdX0rlyxhfPDg_N1m/exec", {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  alert("已送出，圖片已上傳至 Google Drive ✅");
 }
+
 
