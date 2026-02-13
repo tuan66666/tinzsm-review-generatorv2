@@ -4,53 +4,66 @@ const ctx = canvas.getContext("2d");
 const templateImg = new Image();
 templateImg.src = "template.png";
 
-const progressContainer = document.querySelector(".progress-container");
-const progressBar = document.getElementById("progressBar");
-
 const GOOGLE_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbz7bG6uuuqFa9cC06B8EhPkxRHkMg7OUP0AHofcBmgJpU4OGS9XrtyYj1IsFEozESpG/exec";
+  "https://script.google.com/macros/s/AKfycbz7bG6uuuqFa9cC06B8EhPkxRHkMg7OUP0AHofcBmgJpU4OGS9XrtyYj1IsFEozESpG/exec";
 
 
 // ===============================
-// 產生圖片
+// 產生圖片（等待完成）
 // ===============================
-function generate() {
+function generateImage() {
+  return new Promise((resolve, reject) => {
 
-  const file = document.getElementById("imgInput").files[0];
-  const name = document.getElementById("name").value.trim();
-  const comment = document.getElementById("comment").value.trim();
+    const file = document.getElementById("imgInput").files[0];
+    const name = document.getElementById("name").value.trim();
+    const comment = document.getElementById("comment").value.trim();
 
-  if (!file || !name || !comment) {
-    alert("請填寫完整資料");
-    return false;
-  }
+    if (!file || !name || !comment) {
+      alert("請填寫完整資料");
+      reject("資料不完整");
+      return;
+    }
 
-  const userImg = new Image();
-  userImg.src = URL.createObjectURL(file);
+    const userImg = new Image();
+    userImg.src = URL.createObjectURL(file);
 
-  userImg.onload = () => {
+    userImg.onload = () => {
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.drawImage(templateImg, 0, 0, 1080, 1920);
+      // 畫背景
+      ctx.drawImage(templateImg, 0, 0, 1080, 1920);
 
-    ctx.fillStyle = "#000";
-    ctx.font = "bold 34px Arial";
-    ctx.fillText(`顧客：${name}`, 330, 580);
+      // 畫名字
+      ctx.fillStyle = "#000";
+      ctx.font = "bold 34px Arial";
+      ctx.fillText(`顧客：${name}`, 330, 580);
 
-    ctx.drawImage(userImg, 290, 620, 500, 500);
+      // 畫圖片
+      ctx.drawImage(userImg, 290, 620, 500, 500);
 
-    ctx.font = "28px Arial";
-    wrapText(ctx, `評價：${comment}`, 330, 1160, 420, 40);
-  };
+      // 畫評價
+      ctx.font = "28px Arial";
+      wrapText(ctx, `評價：${comment}`, 330, 1160, 420, 40);
 
-  return true;
+      // 🔥 等一幀確保 canvas 完全渲染
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    };
+
+    userImg.onerror = () => {
+      reject("圖片載入失敗");
+    };
+
+  });
 }
 
 
 // ===============================
 function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   let line = "";
+
   for (let char of text) {
     const testLine = line + char;
     if (ctx.measureText(testLine).width > maxWidth) {
@@ -61,36 +74,13 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
       line = testLine;
     }
   }
+
   ctx.fillText(line, x, y);
 }
 
 
 // ===============================
-function animateProgress() {
-  return new Promise((resolve) => {
-
-    progressContainer.style.display = "block";
-    progressBar.style.width = "0%";
-
-    let progress = 0;
-
-    const interval = setInterval(() => {
-      progress += 10;
-
-      if (progress >= 90) {
-        progress = 90;
-        clearInterval(interval);
-        resolve();
-      }
-
-      progressBar.style.width = progress + "%";
-    }, 200);
-  });
-}
-
-
-// ===============================
-// 送出評價
+// 點擊送出
 // ===============================
 async function sendToYou() {
 
@@ -100,22 +90,13 @@ async function sendToYou() {
 
   try {
 
-    // 1️⃣ 產生圖片
-    const ok = generate();
-    if (!ok) {
-      btn.disabled = false;
-      btn.innerText = "送出評價";
-      return;
-    }
+    // 1️⃣ 產生圖片（等待完成）
+    await generateImage();
 
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // 2️⃣ 進度條
-    await animateProgress();
-
-    // 3️⃣ 轉圖
+    // 2️⃣ 轉 base64
     const imageData = canvas.toDataURL("image/png");
 
+    // 3️⃣ 組檔名
     const now = new Date();
     const fileName =
       `review_${now.getFullYear()}_${now.getMonth()+1}_${now.getDate()}_${Date.now()}.png`;
@@ -125,28 +106,23 @@ async function sendToYou() {
       fileName: fileName
     };
 
-    // 4️⃣ 上傳
+    // 4️⃣ 上傳並等待成功
     await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain" },
+      headers: {
+        "Content-Type": "text/plain"
+      },
       body: JSON.stringify(payload)
     });
 
-    progressBar.style.width = "100%";
-
-    setTimeout(() => {
-      alert("您的訂單評價已送出，期待再次為您服務!!!");
-      progressContainer.style.display = "none";
-      progressBar.style.width = "0%";
-      btn.innerText = "送出評價";
-      btn.disabled = false;
-    }, 500);
+    // 5️⃣ 成功才顯示
+    alert("您的訂單評價已送出，期待再次為您服務!!!");
 
   } catch (err) {
     alert("發生錯誤，請稍後再試");
-    progressContainer.style.display = "none";
-    progressBar.style.width = "0%";
-    btn.innerText = "送出評價";
-    btn.disabled = false;
+    console.log(err);
   }
+
+  btn.disabled = false;
+  btn.innerText = "送出評價";
 }
