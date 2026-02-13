@@ -1,113 +1,127 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>謝謝您的購買與寶貴評價❤️</title>
+<meta charset="UTF-8" />
+<title>謝謝您的購買與寶貴評價❤️</title>
 
-      <style>
-    * { box-sizing: border-box; }
+<style>
+* { box-sizing: border-box; }
 
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f2f2f2;
-      padding: 20px;
-    }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f2f2f2;
+  padding: 20px;
+}
 
-    .panel {
-      background: #fff;
-      padding: 24px;
-      max-width: 420px;
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
+.panel {
+  background: #fff;
+  padding: 24px;
+  max-width: 420px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
 
-    h3 {
-      margin-top: 0;
-      margin-bottom: 20px;
-    }
+h3 { margin-top: 0; margin-bottom: 20px; }
 
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 16px;
-      margin-bottom: 6px;
-    }
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 6px;
+}
 
-    input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 8px;
-    }
+input, textarea, button {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+}
 
-    input, textarea {
-      border: 1px solid #ccc;
-    }
+input, textarea { border: 1px solid #ccc; }
 
-    textarea {
-      resize: none;
-      height: 90px;
-    }
+textarea { resize: none; height: 90px; }
 
-    .btn-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
 
-    button {
-      border: none;
-      cursor: pointer;
-      background: #111;
-      color: #fff;
-    }
+button {
+  border: none;
+  cursor: pointer;
+  background: #111;
+  color: #fff;
+  transition: 0.3s;
+}
 
-    button.secondary {
-      background: #e5e5e5;
-      color: #000;
-    }
+button.secondary {
+  background: #e5e5e5;
+  color: #000;
+}
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-    canvas {
-      display: block;
-      margin-top: 30px;
-      width: 420px;
-      border-radius: 10px;
-      background: #fff;
-      border: 1px solid #ccc;
-    }
-  </style>
+/* 進度條 */
+.progress-container {
+  width: 100%;
+  height: 10px;
+  background: #e5e5e5;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 15px;
+  display: none;
+}
 
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #111, #444);
+  transition: width 0.3s ease;
+}
+
+canvas {
+  display: block;
+  margin-top: 30px;
+  width: 420px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="panel">
-    <h3>一筆訂單，一份支持，謝謝您的評價🙏</h3>
-    <h3>感謝好評！老闆會繼續努力 💖</h3>
+<div class="panel">
+  <h3>一筆訂單，一份支持，謝謝您的評價🙏</h3>
+  <h3>感謝好評！老闆會繼續努力 💖</h3>
 
-    <label>顧客圖片 (遊戲截圖 / 完成訂單截圖 ) </label>
-    <input type="file" id="imgInput" accept="image/*" />
+  <label>顧客圖片</label>
+  <input type="file" id="imgInput" accept="image/*" />
 
-    <label>顧客名字</label>
-    <input type="text" id="name" placeholder="例如：王小姐" />
+  <label>顧客名字</label>
+  <input type="text" id="name" placeholder="例如：王小姐" />
 
-    <label>顧客評價</label>
-    <textarea id="comment" placeholder="輸入顧客的評價內容"></textarea>
-    <h3>注意: 先點產生圖片 再點送出評價喔!!!</h3>
-    <div class="btn-row">
-      <button onclick="generate()">產生圖片</button>
-      <button class="secondary" onclick="sendToYou()">送出評價</button>
-    </div>
+  <label>顧客評價</label>
+  <textarea id="comment" placeholder="輸入顧客的評價內容"></textarea>
+
+  <div class="btn-row">
+    <button onclick="generate()">產生圖片</button>
+    <button class="secondary" onclick="sendToYou()">送出評價</button>
   </div>
 
-  <canvas id="canvas" width="1080" height="1920"></canvas>
+  <div class="progress-container" id="progressContainer">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+</div>
 
-  <script src="app.js"></script>
+<canvas id="canvas" width="1080" height="1920"></canvas>
+
+<script src="app.js"></script>
 </body>
 </html>
