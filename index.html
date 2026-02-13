@@ -1,127 +1,105 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8" />
-<title>謝謝您的購買與寶貴評價❤️</title>
-
-<style>
-* { box-sizing: border-box; }
-
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f2f2f2;
-  padding: 20px;
-}
-
-.panel {
-  background: #fff;
-  padding: 24px;
-  max-width: 420px;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-h3 { margin-top: 0; margin-bottom: 20px; }
-
-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 16px;
-  margin-bottom: 6px;
-}
-
-input, textarea, button {
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-input, textarea { border: 1px solid #ccc; }
-
-textarea { resize: none; height: 90px; }
-
-.btn-row {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-button {
-  border: none;
-  cursor: pointer;
-  background: #111;
-  color: #fff;
-  transition: 0.3s;
-}
-
-button.secondary {
-  background: #e5e5e5;
-  color: #000;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* 進度條 */
-.progress-container {
-  width: 100%;
-  height: 10px;
-  background: #e5e5e5;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-top: 15px;
-  display: none;
-}
-
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #111, #444);
-  transition: width 0.3s ease;
-}
-
-canvas {
-  display: block;
-  margin-top: 30px;
-  width: 420px;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #ccc;
-}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>訂單評價</title>
 </head>
 
-<body>
+<body style="font-family:Arial; text-align:center; padding:40px;">
 
-<div class="panel">
-  <h3>一筆訂單，一份支持，謝謝您的評價🙏</h3>
-  <h3>感謝好評！老闆會繼續努力 💖</h3>
+<h2>訂單評價系統</h2>
 
-  <label>顧客圖片</label>
-  <input type="file" id="imgInput" accept="image/*" />
+<button onclick="submitReview()" 
+style="padding:12px 24px; font-size:16px; background:#4CAF50; color:white; border:none; border-radius:6px; cursor:pointer;">
+產生圖片並送出
+</button>
 
-  <label>顧客名字</label>
-  <input type="text" id="name" placeholder="例如：王小姐" />
+<br><br>
 
-  <label>顧客評價</label>
-  <textarea id="comment" placeholder="輸入顧客的評價內容"></textarea>
+<!-- Canvas -->
+<canvas id="canvas" width="600" height="400" 
+style="border:1px solid #ddd; display:none;"></canvas>
 
-  <div class="btn-row">
-    <button onclick="generate()">產生圖片</button>
-    <button class="secondary" onclick="sendToYou()">送出評價</button>
+<!-- 進度條 -->
+<div id="progress-container" style="display:none; width:100%; max-width:400px; margin:20px auto;">
+  <div style="width:100%; background:#eee; border-radius:10px; overflow:hidden;">
+    <div id="progress-bar" 
+    style="width:0%; height:20px; background:#4CAF50; transition:width 0.2s;"></div>
   </div>
-
-  <div class="progress-container" id="progressContainer">
-    <div class="progress-bar" id="progressBar"></div>
-  </div>
+  <p id="progress-text" style="margin-top:8px; font-size:14px;">
+    請稍等幾秒鐘...
+  </p>
 </div>
 
-<canvas id="canvas" width="1080" height="1920"></canvas>
+<script>
 
-<script src="app.js"></script>
+const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL";
+
+async function submitReview() {
+
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  // 1️⃣ 產生圖片
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#333";
+  ctx.font = "28px Arial";
+  ctx.fillText("訂單評價完成", 180, 180);
+
+  ctx.font = "18px Arial";
+  ctx.fillText("感謝您的支持 ❤️", 210, 230);
+
+  const imageData = canvas.toDataURL("image/png");
+
+  // 2️⃣ 顯示進度條
+  const progressBar = document.getElementById("progress-bar");
+  const progressContainer = document.getElementById("progress-container");
+
+  progressContainer.style.display = "block";
+
+  let progress = 0;
+
+  const interval = setInterval(() => {
+    if (progress < 95) {
+      progress += Math.random() * 5;
+      progressBar.style.width = progress + "%";
+    }
+  }, 200);
+
+  try {
+
+    // 3️⃣ 自動上傳
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        image: imageData,
+        fileName: "review_" + Date.now() + ".png"
+      })
+    });
+
+    clearInterval(interval);
+    progressBar.style.width = "100%";
+
+    setTimeout(() => {
+      alert("您的訂單評價已送出，期待再次為您服務!!!");
+      progressBar.style.width = "0%";
+      progressContainer.style.display = "none";
+    }, 500);
+
+  } catch (err) {
+
+    clearInterval(interval);
+    alert("發生錯誤，請稍後再試");
+    progressBar.style.width = "0%";
+    progressContainer.style.display = "none";
+  }
+}
+
+</script>
+
 </body>
 </html>
